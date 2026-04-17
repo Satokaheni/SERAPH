@@ -1,0 +1,97 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+.virtualenv/
+
+# Results & outputs
+results/
+outputs/
+comparison/
+human_eval/
+paper/
+*.json
+*.jsonl
+*.csv
+!requirements*.txt
+
+# HuggingFace / datasets cache
+~/.cache/huggingface/
+.cache/
+datasets_cache/
+*.arrow
+*.parquet
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# LaTeX source and build artifacts
+*.tex
+*.bib
+*.sty
+*.bst
+*.pdf
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.toc
+*.lot
+*.lof
+_minted*/
+
+# Stage debug outputs
+stage_outputs/
+*.stage*.json
+
+# Datasets (large ML datasets, not tracked in git)
+data/
+
+# Checkpoints
+.checkpoints/
+**/checkpoints/
+
+# Generated output text files
+aligned_*.txt
+raw_claude_outputs.txt
+seraph_outputs.txt
+seraph_contexts.txt
+moel_contexts_300.txt
+output.txt
+
+# Numpy arrays / binary data
+*.npy
+*.npz
+
+# Windows crash dumps
+*.stackdump
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

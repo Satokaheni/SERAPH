@@ -1,0 +1,46 @@
+# SERAPH — Requirements
+# Python 3.10+
+#
+# Install (CPU / Windows / Mac):
+#   pip install -r requirements.txt
+#
+# Install (Lambda Labs / AWS GPU — CUDA 12.1):
+#   pip install -r requirements.txt
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+#
+# PyTorch is optional — only needed for DialogueRNN checkpoint mode.
+# The default feature_based mode works without it.
+
+# Anthropic API
+# 0.80+ required: structured tool use, prompt caching, and batch API used throughout
+anthropic>=0.80.0
+
+# Pydantic for structured stage outputs
+pydantic>=2.0.0
+
+# ML / NLP
+scikit-learn>=1.3.0        # F1 scoring, classification metrics
+numpy>=1.26.0              # 1.26+ for stable numpy 2.x compatibility shims
+pandas>=2.0.0
+scipy>=1.11.0              # Bootstrap CI helpers
+
+# Dataset loading helpers
+# 3.0+ required: trust_remote_code removed, hf:// parquet URLs need 3.x+
+datasets>=3.0.0
+# 1.0+ required: hf:// URL protocol, modern cache layout, symlinks warning env var
+huggingface-hub>=1.0.0
+
+# Utilities
+python-dotenv>=1.0.0        # Load .env for API key
+tqdm>=4.66.0                # Progress bars in benchmark runs
+rich>=13.0.0                # Pretty console output (optional)
+
+# LaTeX / reporting (optional, for paper generation helpers)
+jinja2>=3.1.0               # Template-based LaTeX generation
+
+# PyTorch — optional, only for DialogueRNN checkpoint mode
+# CPU-only (default, works everywhere):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# GPU (Lambda Labs / AWS, CUDA 12.1):
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+# torch>=2.5.0              # uncomment if using checkpoint mode

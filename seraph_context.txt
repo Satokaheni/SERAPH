@@ -1,0 +1,83 @@
+SERAPH — Full Resume Context
+
+What it is: A novel NLP research pipeline targeting ACL/EMNLP/NAACL. The core claim: self-simulation grounded in cognitive psychology measurably improves empathy alignment scores vs SOTA baselines. Before generating any response, the agent asks: "If I were a human feeling [emotion] at [intensity] in [context], how would this response feel to me?" Grounded in Simulation Theory, BDI Modeling, Gross's Emotion Regulation Model, Plutchik's Wheel, and Mirror Neuron Theory. This has not been formally implemented or benchmarked end-to-end in the literature — that is the novel contribution.
+
+The 5-stage pipeline:
+
+Stage 1 (Haiku) — raw emotional signal extraction, no labeling yet
+Stage 2 (Haiku) — Plutchik classification + VAD scores + BDI sketch + Gross regulation state
+Stage 3 (Sonnet) — Self-Simulation Core ← the novel contribution, 7-step first-person simulation
+Stage 4 (Sonnet) — Ethical Gate: APPROVE / MODIFY / BLOCK
+Stage 5 (Sonnet) — empathy-informed response + EmpathicReasoningExplanation for transparency
+
+No training required — all intelligence comes from Anthropic's models via structured prompting and pipeline architecture.
+
+Tech stack: Python 3.10+, Anthropic API, Pydantic v2, scikit-learn, HuggingFace datasets, scipy. PyTorch optional (DialogueRNN checkpoint mode only). Runs on Windows, macOS, Linux, and Lambda Labs GPU instances.
+
+Complete codebase — 27/27 files syntax-clean, zero cross-platform issues:
+seraph/
+├── paths.py                         ← central path anchor (PROJECT_ROOT-relative, Windows-safe)
+├── config.py                        ← models, cost config, dotenv loader
+├── main.py                          ← CLI orchestrator + all 6 ablation variants
+├── requirements.txt                 ← CPU + GPU install instructions
+├── setup.sh                         ← Linux/macOS/Windows Git Bash (GPU auto-detection)
+├── setup.ps1                        ← Windows PowerShell
+├── .env.example                     ← API key + baseline mode config
+├── pipeline/
+│   ├── stage1_recognizer.py
+│   ├── stage2_classifier.py
+│   ├── stage3_self_simulation.py    ← most important file
+│   ├── stage4_ethical_gate.py
+│   └── stage5_response_generator.py
+├── benchmarks/
+│   ├── batch_runner.py              ← 5-wave Batch API engine (10 days → ~4 hrs)
+│   ├── iemocap_eval.py
+│   ├── meld_eval.py
+│   └── empathetic_dialogues_eval.py
+├── baselines/
+│   ├── raw_claude_baseline.py       ← single-prompt Sonnet, no pipeline
+│   ├── dialogue_rnn_baseline.py     ← NRC + LogReg, GPU-aware
+│   └── cem_mime_baseline.py         ← CEM + MIME wrappers
+├── ablations/
+│   └── run_ablations.py             ← 6 variants × 3 datasets
+├── metrics/
+│   └── empathy_scorer.py            ← LLM-as-judge (5 dimensions) + F1
+├── analysis/
+│   ├── significance_tests.py        ← paired bootstrap, 14 key comparisons
+│   ├── results_table_generator.py   ← benchmark JSON → 4 LaTeX tables
+│   └── human_eval_tool.py           ← CLI annotation + Cohen's κ
+├── data/
+│   └── prepare_datasets.py          ← downloads MELD + ED, preprocesses IEMOCAP
+└── paper/
+    ├── main.tex                     ← full ACL/EMNLP scaffold + [TODO] stubs
+    ├── seraph.bib                   ← 22 bibliography entries
+    └── figures/pipeline_diagram.tex ← TikZ architecture diagram
+
+Key design decisions already made:
+
+USE_BATCH_API = True in config.py — default for all benchmark runs
+USE_BATCH_API = False for local test runs with --sample-limit 5
+All paths use PATHS.* from paths.py — never hardcoded strings
+All file I/O uses encoding="utf-8" explicitly — Windows cp1252 safe
+get_torch_device() in paths.py — auto-selects CUDA or CPU
+Pickle protocol 4 — cross-platform model serialization
+
+
+Datasets:
+
+MELD — freely downloadable, python data/prepare_datasets.py --dataset meld
+EmpatheticDialogues — freely downloadable via HuggingFace
+IEMOCAP — manual license required from sail.usc.edu/iemocap, place at data/raw/IEMOCAP_full_release/
+
+API: Anthropic API (separate from Claude.ai Pro). Get key at console.anthropic.com. Recommended starting budget: $50 for local testing, top up to $150-200 for full experiment. USE_BATCH_API=True is critical — cuts wall time from 10 days to ~4 hours.
+
+Immediate next steps when resuming:
+
+bash setup.sh — installs everything, auto-detects GPU
+Add ANTHROPIC_API_KEY to .env
+python data/prepare_datasets.py --all
+python main.py --text "I just found out I didn't get the job." --verbose — first real test (~$0.05)
+python main.py --benchmark --dataset meld --sample-limit 5 — confirms benchmark harness works
+Full run: flip USE_BATCH_API=True, run python -m ablations.run_ablations
+Fill [TODO] sections in paper/main.tex with results
+python analysis/significance_tests.py --latex — generates significance table for paper
