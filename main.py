@@ -11,7 +11,7 @@ Usage:
     python main.py --text "I've been feeling really overwhelmed lately."
 
     # Benchmark run
-    python main.py --benchmark --dataset iemocap --sample-limit 100
+    python main.py --benchmark --dataset meld --sample-limit 100
 
     # Ablation study
     python main.py --ablation no_stage3 --dataset meld
@@ -490,12 +490,10 @@ def main() -> None:
 
     if args.benchmark:
         # Delegate to benchmark runner
-        from benchmarks.iemocap_eval import run_iemocap_eval
         from benchmarks.meld_eval import run_meld_eval
         from benchmarks.empathetic_dialogues_eval import run_ed_eval
 
         eval_map = {
-            "iemocap": run_iemocap_eval,
             "meld": run_meld_eval,
             "empathetic_dialogues": run_ed_eval,
         }

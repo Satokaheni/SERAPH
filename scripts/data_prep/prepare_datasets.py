@@ -1,26 +1,18 @@
 """
 SERAPH Dataset Preparation
 ============================
-Downloads (where possible) and preprocesses all three benchmark datasets
-into the format expected by the SERAPH benchmark evaluators.
+Downloads and preprocesses the benchmark datasets into the format
+expected by the SERAPH benchmark evaluators.
 
 Usage:
     python prepare_datasets.py --all
     python prepare_datasets.py --dataset meld
     python prepare_datasets.py --dataset empathetic_dialogues
-    python prepare_datasets.py --dataset iemocap --iemocap-raw data/raw/IEMOCAP_full_release
-
-IEMOCAP NOTE:
-    IEMOCAP requires a manual license request from USC SAIL.
-    Request access at: https://sail.usc.edu/iemocap/
-    Once downloaded, place IEMOCAP_full_release/ at data/raw/IEMOCAP_full_release/
-    then run with --dataset iemocap.
 
 MELD and EmpatheticDialogues are freely downloadable — this script handles
 both automatically.
 
 Output locations:
-    data/iemocap/iemocap_processed.json
     data/meld/train_sent_emo.csv
     data/meld/dev_sent_emo.csv
     data/meld/test_sent_emo.csv
@@ -213,162 +205,6 @@ def _ed_via_github(out_dir: Path) -> bool:
 
 
 # ============================================================
-# IEMOCAP
-# ============================================================
-
-IEMOCAP_EMOTION_MAP = {
-    "ang": "anger",
-    "hap": "happiness",
-    "exc": "excited",
-    "sad": "sadness",
-    "neu": "neutral",
-    "fru": "frustrated",
-    "fea": "fearful",
-    "sur": "surprised",
-    "dis": "disgusted",
-    "oth": None,   # skip
-    "xxx": None,   # skip
-}
-
-
-def prepare_iemocap(raw_dir: Optional[Path] = None) -> bool:
-    """
-    Preprocess IEMOCAP from the IEMOCAP_full_release directory.
-
-    Parses per-session EmoEvaluation label files and transcription files,
-    producing a flat JSON list at data/iemocap/iemocap_processed.json.
-
-    Args:
-        raw_dir: Path to IEMOCAP_full_release/ (defaults to data/raw/IEMOCAP_full_release/).
-
-    Returns:
-        True if processing succeeded.
-    """
-    raw_dir = raw_dir or (PATHS.data_raw / "IEMOCAP_full_release")
-    out_dir = PATHS.iemocap_data.parent
-    out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = PATHS.iemocap_data
-
-    if out_path.exists():
-        with out_path.open(encoding="utf-8") as f:
-            existing = json.load(f)
-        logger.info(
-            "IEMOCAP already processed (%d utterances) at %s — skipping.",
-            len(existing), out_path,
-        )
-        return True
-
-    if not raw_dir.exists():
-        logger.error(
-            "IEMOCAP raw directory not found at %s.\n"
-            "  1. Request access at https://sail.usc.edu/iemocap/\n"
-            "  2. Download and extract IEMOCAP_full_release/\n"
-            "  3. Place it at %s\n"
-            "  4. Re-run: python prepare_datasets.py --dataset iemocap",
-            raw_dir, raw_dir,
-        )
-        return False
-
-    logger.info("Processing IEMOCAP from %s …", raw_dir)
-    records = []
-    skipped_no_text = 0
-    skipped_other_label = 0
-
-    for session_dir in sorted(raw_dir.glob("Session*")):
-        session_id = int(re.search(r"\d+", session_dir.name).group())
-
-        label_dir = session_dir / "dialog" / "EmoEvaluation"
-        trans_dir = session_dir / "dialog" / "transcriptions"
-
-        if not label_dir.exists():
-            logger.warning("No EmoEvaluation dir in %s — skipping session.", session_dir)
-            continue
-
-        for label_file in sorted(label_dir.glob("*.txt")):
-            dialogue_id = label_file.stem
-
-            # ---- Load transcriptions ----
-            transcriptions: dict[str, str] = {}
-            trans_file = trans_dir / f"{dialogue_id}.txt"
-            if trans_file.exists():
-                for line in trans_file.read_text(encoding="utf-8", errors="ignore").splitlines():
-                    # Format: Ses01F_impro01_F000 [start-end]: transcription text
-                    m = re.match(r"^(\S+)\s+\[\d+\.\d+-\d+\.\d+\]:\s+(.+)$", line)
-                    if m:
-                        transcriptions[m.group(1)] = m.group(2).strip()
-
-            # ---- Parse emotion label lines ----
-            # Format: [start - end]\tutterance_id\temotion\t[V, A, D]; ...
-            for line in label_file.read_text(encoding="utf-8", errors="ignore").splitlines():
-                if not line.startswith("["):
-                    continue
-                parts = line.split("\t")
-                if len(parts) < 3:
-                    continue
-
-                utt_id      = parts[1].strip()
-                emotion_raw = parts[2].strip().lower()
-                emotion     = IEMOCAP_EMOTION_MAP.get(emotion_raw)
-
-                if emotion is None:
-                    skipped_other_label += 1
-                    continue
-
-                utterance = transcriptions.get(utt_id, "")
-                if not utterance:
-                    skipped_no_text += 1
-                    continue
-
-                # Parse VAD scores if present: [V, A, D]
-                vad = {}
-                vad_match = re.search(r"\[([0-9.\-]+),\s*([0-9.\-]+),\s*([0-9.\-]+)\]", line)
-                if vad_match:
-                    vad = {
-                        "valence":   float(vad_match.group(1)),
-                        "activation": float(vad_match.group(2)),
-                        "dominance": float(vad_match.group(3)),
-                    }
-
-                # Determine speaker from utterance ID suffix
-                speaker = "M" if re.search(r"_M\d+$", utt_id) else "F"
-
-                records.append({
-                    "utterance":    utterance,
-                    "emotion":      emotion,
-                    "speaker":      speaker,
-                    "session":      session_id,
-                    "dialogue_id":  dialogue_id,
-                    "utterance_id": utt_id,
-                    "vad":          vad,
-                })
-
-    logger.info(
-        "IEMOCAP: extracted %d utterances "
-        "(skipped %d other-label, %d no-transcription)",
-        len(records), skipped_other_label, skipped_no_text,
-    )
-
-    if not records:
-        logger.error("No records extracted — check raw directory structure.")
-        return False
-
-    with out_path.open("w", encoding="utf-8") as f:
-        json.dump(records, f, indent=2, ensure_ascii=False)
-
-    logger.info("IEMOCAP saved to %s", out_path)
-    _print_iemocap_stats(records)
-    return True
-
-
-def _print_iemocap_stats(records: list[dict]) -> None:
-    from collections import Counter
-    counts = Counter(r["emotion"] for r in records)
-    logger.info("IEMOCAP label distribution:")
-    for emotion, count in sorted(counts.items(), key=lambda x: -x[1]):
-        logger.info("  %-15s %d", emotion, count)
-
-
-# ============================================================
 # Dataset integrity check
 # ============================================================
 
@@ -384,7 +220,6 @@ def verify_all() -> None:
         "ED train":          PATHS.ed_train,
         "ED valid":          PATHS.ed_valid,
         "ED test":           PATHS.ed_test,
-        "IEMOCAP processed": PATHS.iemocap_data,
     }
     print("\nDataset readiness check:")
     print("─" * 45)
@@ -400,7 +235,6 @@ def verify_all() -> None:
         print("  All datasets ready for benchmarking.\n")
     else:
         print("  Run `python prepare_datasets.py --all` to download missing datasets.\n")
-        print("  NOTE: IEMOCAP requires manual download — see script header for instructions.\n")
 
 
 # ============================================================
@@ -417,14 +251,8 @@ def main() -> None:
     )
     parser.add_argument(
         "--dataset",
-        choices=["iemocap", "meld", "empathetic_dialogues"],
+        choices=["meld", "empathetic_dialogues"],
         help="Prepare a specific dataset",
-    )
-    parser.add_argument(
-        "--iemocap-raw",
-        type=Path,
-        default=None,
-        help="Path to IEMOCAP_full_release/ directory (default: data/raw/IEMOCAP_full_release/)",
     )
     parser.add_argument(
         "--verify", action="store_true",
@@ -448,9 +276,6 @@ def main() -> None:
 
     if args.all or args.dataset == "empathetic_dialogues":
         results["empathetic_dialogues"] = prepare_empathetic_dialogues()
-
-    if args.all or args.dataset == "iemocap":
-        results["iemocap"] = prepare_iemocap(raw_dir=args.iemocap_raw)
 
     print()
     verify_all()

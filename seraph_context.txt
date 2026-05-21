@@ -31,7 +31,6 @@ seraph/
 │   └── stage5_response_generator.py
 ├── benchmarks/
 │   ├── batch_runner.py              ← 5-wave Batch API engine (10 days → ~4 hrs)
-│   ├── iemocap_eval.py
 │   ├── meld_eval.py
 │   └── empathetic_dialogues_eval.py
 ├── baselines/
@@ -39,7 +38,7 @@ seraph/
 │   ├── dialogue_rnn_baseline.py     ← NRC + LogReg, GPU-aware
 │   └── cem_mime_baseline.py         ← CEM + MIME wrappers
 ├── ablations/
-│   └── run_ablations.py             ← 6 variants × 3 datasets
+│   └── run_ablations.py             ← 6 variants × 2 datasets
 ├── metrics/
 │   └── empathy_scorer.py            ← LLM-as-judge (5 dimensions) + F1
 ├── analysis/
@@ -47,7 +46,7 @@ seraph/
 │   ├── results_table_generator.py   ← benchmark JSON → 4 LaTeX tables
 │   └── human_eval_tool.py           ← CLI annotation + Cohen's κ
 ├── data/
-│   └── prepare_datasets.py          ← downloads MELD + ED, preprocesses IEMOCAP
+│   └── prepare_datasets.py          ← downloads MELD + ED
 └── paper/
     ├── main.tex                     ← full ACL/EMNLP scaffold + [TODO] stubs
     ├── seraph.bib                   ← 22 bibliography entries
@@ -67,7 +66,6 @@ Datasets:
 
 MELD — freely downloadable, python data/prepare_datasets.py --dataset meld
 EmpatheticDialogues — freely downloadable via HuggingFace
-IEMOCAP — manual license required from sail.usc.edu/iemocap, place at data/raw/IEMOCAP_full_release/
 
 API: Anthropic API (separate from Claude.ai Pro). Get key at console.anthropic.com. Recommended starting budget: $50 for local testing, top up to $150-200 for full experiment. USE_BATCH_API=True is critical — cuts wall time from 10 days to ~4 hours.
 

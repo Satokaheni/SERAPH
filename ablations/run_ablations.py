@@ -1,7 +1,7 @@
 """
 SERAPH Ablation Study Runner
 ==============================
-Runs all 6 ablation variants across all 3 datasets and produces
+Runs all 6 ablation variants across all datasets and produces
 a consolidated comparison table.
 
 Ablation Variants:
@@ -42,7 +42,7 @@ def run_all_ablations(
     Run ablation variants across all specified datasets.
 
     Args:
-        datasets: List of dataset names. Defaults to all three.
+        datasets: List of dataset names. Defaults to all.
         sample_limit: Max samples per dataset per variant.
                       Recommend 200–500 for ablation speed.
         output_dir: Directory to save per-variant result JSON files.
@@ -51,15 +51,13 @@ def run_all_ablations(
     Returns:
         Nested dict: {dataset: {variant: BenchmarkMetrics.to_dict()}}
     """
-    from benchmarks.iemocap_eval import run_iemocap_eval
     from benchmarks.meld_eval import run_meld_eval
     from benchmarks.empathetic_dialogues_eval import run_ed_eval
 
     if datasets is None:
-        datasets = ["iemocap", "meld", "empathetic_dialogues"]
+        datasets = ["meld", "empathetic_dialogues"]
 
     eval_fn_map = {
-        "iemocap": run_iemocap_eval,
         "meld": run_meld_eval,
         "empathetic_dialogues": run_ed_eval,
     }
@@ -139,7 +137,7 @@ def main() -> None:
     parser.add_argument(
         "--datasets",
         nargs="+",
-        choices=["iemocap", "meld", "empathetic_dialogues"],
+        choices=["meld", "empathetic_dialogues"],
         default=None,
         help="Datasets to evaluate on (default: all)",
     )

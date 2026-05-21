@@ -45,7 +45,7 @@ AVAILABLE_BASELINES = {
     "mime":         "MIME emotion-mirroring baseline (LLM approximation)",
 }
 
-AVAILABLE_DATASETS = ["meld", "empathetic_dialogues", "iemocap"]
+AVAILABLE_DATASETS = ["meld", "empathetic_dialogues"]
 
 
 def run_baselines(

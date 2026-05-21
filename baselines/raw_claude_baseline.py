@@ -130,7 +130,7 @@ def run_raw_claude_eval(
     Run the raw Claude baseline on a dataset.
 
     Args:
-        dataset: One of 'iemocap', 'meld', 'empathetic_dialogues'
+        dataset: One of 'meld', 'empathetic_dialogues'
         sample_limit: Max samples
         output_dir: Results directory
 
@@ -142,10 +142,7 @@ def run_raw_claude_eval(
     from metrics.empathy_scorer import EmpathyScorer, BenchmarkMetrics
 
     # Reuse dataset loaders from benchmark evaluators
-    if dataset == "iemocap":
-        from benchmarks.iemocap_eval import load_iemocap, IEMOCAP_TO_PLUTCHIK as label_map
-        samples = load_iemocap(sample_limit)
-    elif dataset == "meld":
+    if dataset == "meld":
         from benchmarks.meld_eval import load_meld, MELD_TO_PLUTCHIK as label_map
         samples = load_meld(sample_limit)
     elif dataset == "empathetic_dialogues":

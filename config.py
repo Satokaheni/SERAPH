@@ -58,7 +58,7 @@ TEMPERATURE: dict[str, float] = {
 class ExperimentConfig:
     """Parameters for a benchmark run."""
     datasets: list[str] = field(
-        default_factory=lambda: ["iemocap", "meld", "empathetic_dialogues"]
+        default_factory=lambda: ["meld", "empathetic_dialogues"]
     )
     sample_limit: Optional[int] = None
     seed: int = 42

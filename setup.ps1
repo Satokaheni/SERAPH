@@ -84,7 +84,6 @@ Write-Host "→ Creating project directories..." -ForegroundColor Yellow
 
 $dirs = @(
     "data\raw",
-    "data\iemocap",
     "data\meld",
     "data\empathetic_dialogues",
     "data\human_eval\annotations",

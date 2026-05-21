@@ -387,7 +387,7 @@ def run_baseline_eval(
 
     Args:
         baseline_name: 'cem' or 'mime'
-        dataset: 'iemocap', 'meld', or 'empathetic_dialogues'
+        dataset: 'meld' or 'empathetic_dialogues'
         sample_limit: Max samples
         output_dir: Results directory
 
@@ -397,10 +397,7 @@ def run_baseline_eval(
     from metrics.empathy_scorer import EmpathyScorer, BenchmarkMetrics
 
     # Load dataset
-    if dataset == "iemocap":
-        from benchmarks.iemocap_eval import load_iemocap, IEMOCAP_TO_PLUTCHIK as lmap
-        samples = load_iemocap(sample_limit)
-    elif dataset == "meld":
+    if dataset == "meld":
         from benchmarks.meld_eval import load_meld, MELD_TO_PLUTCHIK as lmap
         samples = load_meld(sample_limit)
     elif dataset == "empathetic_dialogues":

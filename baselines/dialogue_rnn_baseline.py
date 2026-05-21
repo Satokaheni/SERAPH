@@ -151,7 +151,7 @@ class EmotionFeatureExtractor:
     """
     Extracts NRC-lexicon + surface features from text for emotion classification.
     Approximates the feature representation used in lexicon-based baselines
-    like nBERT + NRC (reported 91.53% precision on IEMOCAP).
+    like nBERT + NRC.
     """
 
     def __init__(self) -> None:
@@ -427,7 +427,7 @@ def train_logreg_on_dataset(
     This gives a calibrated feature-based baseline comparable to nBERT + NRC.
 
     Args:
-        dataset: 'iemocap', 'meld', or 'empathetic_dialogues'
+        dataset: 'meld' or 'empathetic_dialogues'
         sample_limit: Max training samples
         save_path: Where to save the fitted classifier pickle
     """
@@ -438,10 +438,7 @@ def train_logreg_on_dataset(
     logger.info("Training DialogueRNN LogReg approximation on %s …", dataset)
 
     # Load dataset
-    if dataset == "iemocap":
-        from benchmarks.iemocap_eval import load_iemocap, IEMOCAP_TO_PLUTCHIK as lmap
-        samples = load_iemocap(sample_limit)
-    elif dataset == "meld":
+    if dataset == "meld":
         from benchmarks.meld_eval import load_meld, MELD_TO_PLUTCHIK as lmap
         samples = load_meld(sample_limit)
     elif dataset == "empathetic_dialogues":
@@ -497,10 +494,7 @@ def run_dialogue_rnn_eval(
     from pathlib import Path
     from metrics.empathy_scorer import EmpathyScorer, BenchmarkMetrics
 
-    if dataset == "iemocap":
-        from benchmarks.iemocap_eval import load_iemocap, IEMOCAP_TO_PLUTCHIK as lmap
-        samples = load_iemocap(sample_limit)
-    elif dataset == "meld":
+    if dataset == "meld":
         from benchmarks.meld_eval import load_meld, MELD_TO_PLUTCHIK as lmap
         samples = load_meld(sample_limit)
     elif dataset == "empathetic_dialogues":

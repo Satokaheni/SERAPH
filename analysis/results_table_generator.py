@@ -91,7 +91,6 @@ def generate_main_results_table(results_dir: Path, output_dir: Path) -> str:
         ("DialogueRNN",       "dialogue_rnn"),
     ]
     all_datasets = [
-        ("IEMOCAP",             "iemocap"),
         ("MELD",                "meld"),
         ("EmpathDial",          "empathetic_dialogues"),
     ]

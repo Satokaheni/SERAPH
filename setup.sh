@@ -111,7 +111,7 @@ else
 fi
 
 # ── Directories ───────────────────────────────────────────────
-mkdir -p data/raw data/iemocap data/meld data/empathetic_dialogues
+mkdir -p data/raw data/meld data/empathetic_dialogues
 mkdir -p data/human_eval/annotations
 mkdir -p results/ablations results/checkpoints
 mkdir -p baselines/checkpoints/CEM baselines/checkpoints/MIME

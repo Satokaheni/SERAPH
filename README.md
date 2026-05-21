@@ -75,7 +75,6 @@ seraph/
 │
 ├── benchmarks/
 │   ├── batch_runner.py                   ← 5-wave Batch API engine
-│   ├── iemocap_eval.py
 │   ├── meld_eval.py
 │   └── empathetic_dialogues_eval.py
 │
@@ -85,7 +84,7 @@ seraph/
 │   └── cem_mime_baseline.py              ← CEM + MIME wrappers
 │
 ├── ablations/
-│   └── run_ablations.py                  ← 6 variants × 3 datasets
+│   └── run_ablations.py                  ← 6 variants × 2 datasets
 │
 ├── metrics/
 │   └── empathy_scorer.py                 ← LLM-as-judge (5 dimensions) + F1
@@ -125,7 +124,6 @@ seraph/
 │
 └── data/                                 ← gitignored (downloaded datasets)
     ├── empathetic_dialogues/
-    ├── iemocap/
     ├── meld/
     └── raw/
 ```
@@ -226,22 +224,6 @@ MELD downloads directly from GitHub. EmpatheticDialogues downloads via HuggingFa
 ```bash
 python scripts/data_prep/prepare_datasets.py --dataset meld
 python scripts/data_prep/prepare_datasets.py --dataset empathetic_dialogues
-```
-
-### IEMOCAP (requires a manual license)
-
-IEMOCAP requires a license from USC SAIL. Request access at [sail.usc.edu/iemocap](https://sail.usc.edu/iemocap/).
-
-Once downloaded:
-
-```bash
-# Place the release folder at:
-#   data/raw/IEMOCAP_full_release/
-
-python scripts/data_prep/prepare_datasets.py --dataset iemocap
-
-# Or specify a custom path:
-python scripts/data_prep/prepare_datasets.py --dataset iemocap --iemocap-raw /path/to/IEMOCAP_full_release
 ```
 
 ### Check dataset readiness at any time
@@ -479,7 +461,7 @@ python main.py --text "I've been feeling really overwhelmed lately." --output ou
 
 ## Benchmark Evaluation
 
-Benchmarks evaluate SERAPH on IEMOCAP, MELD, and EmpatheticDialogues and produce JSON result files consumed by the analysis scripts.
+Benchmarks evaluate SERAPH on MELD and EmpatheticDialogues and produce JSON result files consumed by the analysis scripts.
 
 > **Before running benchmarks:** ensure `USE_BATCH_API = True` in `config.py` for real runs. Use `False` only for the 5-sample smoke test.
 
@@ -503,12 +485,9 @@ python main.py --benchmark --dataset meld
 
 # EmpatheticDialogues valid set (~1–2 hrs with Batch API)
 python main.py --benchmark --dataset empathetic_dialogues
-
-# IEMOCAP (~2–4 hrs with Batch API)
-python main.py --benchmark --dataset iemocap
 ```
 
-### Step 2 — Full benchmark, all three datasets
+### Step 2 — Full benchmark, both datasets
 
 ```bash
 python main.py --benchmark
@@ -521,8 +500,7 @@ Results are saved to `results/`:
 ```
 results/
 ├── meld_full.json
-├── empathetic_dialogues_full.json
-└── iemocap_full.json
+└── empathetic_dialogues_full.json
 ```
 
 Each file contains a `metrics` dict (weighted F1, macro F1, per-class F1, all five empathy dimensions) and a `results` list with per-sample predictions and responses.
@@ -706,8 +684,8 @@ All estimates assume `USE_BATCH_API = True` (50% discount) and `USE_PROMPT_CACHI
 | Single text test | ~$0.05 |
 | Smoke test (5 samples, one dataset) | ~$0.25 |
 | Full benchmark, one dataset | ~$15–30 |
-| Full benchmark, all three datasets | ~$50–80 |
-| Full ablation study (6 variants × 3 datasets) | ~$150–200 |
+| Full benchmark, both datasets | ~$50–80 |
+| Full ablation study (6 variants × 2 datasets) | ~$150–200 |
 
 **Critical:** Always use `USE_BATCH_API = True` for anything beyond a 5-sample smoke test. Sequential mode on the full datasets costs 2× more and takes 8–23 hours per dataset.
 
@@ -720,7 +698,6 @@ Starting budget recommendation: add $50 to your Anthropic API account for develo
 | | Sequential (`USE_BATCH_API = False`) | Batch API (`USE_BATCH_API = True`) |
 |---|---|---|
 | **Wall time — full MELD** | ~8 hours | ~1–2 hours |
-| **Wall time — full IEMOCAP** | ~23 hours | ~2–4 hours |
 | **Cost** | 1× baseline | 0.5× (50% discount) |
 | **Resumable if interrupted** | No | Yes — wave checkpoints saved automatically |
 | **Best for** | Debugging, smoke tests | All real benchmark and ablation runs |
@@ -746,9 +723,6 @@ Run all commands from the project root directory (the folder containing `main.py
 
 **Stage JSON parse error**  
 Rare, but can happen if the model wraps its output in markdown fences. The pipeline strips ` ```json ` fences automatically. If errors persist, set `SERAPH_LOG_LEVEL=DEBUG` in `.env` to inspect the raw model output in the logs.
-
-**IEMOCAP data not found**  
-IEMOCAP requires a manual license from USC SAIL — it cannot be downloaded automatically. See [sail.usc.edu/iemocap](https://sail.usc.edu/iemocap/). Once licensed, place the `IEMOCAP_full_release/` folder at `data/raw/IEMOCAP_full_release/` and run `python scripts/data_prep/prepare_datasets.py --dataset iemocap`.
 
 **Batch job appears stuck**  
 The batch runner polls every 30 seconds with a 6-hour maximum wait. If a job genuinely stalls, the batch ID is printed in the log output. Check its status at [console.anthropic.com](https://console.anthropic.com). Re-running the same command resumes from the last saved checkpoint wave.
@@ -781,4 +755,4 @@ If you use SERAPH in your research, please cite:
 
 This project is released under the [MIT License](LICENSE).
 
-The datasets used for evaluation (EmpatheticDialogues, MELD, IEMOCAP) are subject to their own licenses — see each dataset's original source for terms.
+The datasets used for evaluation (EmpatheticDialogues, MELD) are subject to their own licenses — see each dataset's original source for terms.

@@ -10,7 +10,7 @@ fully compatible with Windows path separators.
 
 Usage:
     from paths import PATHS
-    data = PATHS.iemocap_data
+    data = PATHS.meld_data
     results = PATHS.results / "meld_full.json"
 """
 
@@ -35,7 +35,6 @@ class ProjectPaths:
     # ── Data ────────────────────────────────────────────────
     data:                   Path
     data_raw:               Path
-    iemocap_data:           Path
     meld_data:              Path
     meld_train:             Path
     meld_dev:               Path
@@ -76,7 +75,6 @@ class ProjectPaths:
             # Data
             data=d,
             data_raw=d / "raw",
-            iemocap_data=d / "iemocap" / "iemocap_processed.json",
             meld_data=d / "meld",
             meld_train=d / "meld" / "train_sent_emo.csv",
             meld_dev=d  / "meld" / "dev_sent_emo.csv",
@@ -112,7 +110,6 @@ class ProjectPaths:
         """Create all necessary output directories if they don't exist."""
         dirs = [
             self.data_raw,
-            self.data / "iemocap",
             self.meld_data,
             self.ed_data,
             self.human_eval_annotations,

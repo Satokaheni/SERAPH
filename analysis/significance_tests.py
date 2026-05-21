@@ -339,12 +339,10 @@ KEY_COMPARISONS = [
     # Primary claim: self-simulation helps
     ("full", "no_stage3",    "empathetic_dialogues", "empathy_score"),
     ("full", "no_stage3",    "meld",                 "empathy_score"),
-    ("full", "no_stage3",    "iemocap",              "empathy_score"),
 
     # F1 classification comparisons
     ("full", "no_stage3",    "empathetic_dialogues", "weighted_f1"),
     ("full", "dialogue_rnn", "meld",                 "weighted_f1"),
-    ("full", "dialogue_rnn", "iemocap",              "weighted_f1"),
 
     # SERAPH vs raw Claude
     ("full", "raw_claude",   "empathetic_dialogues", "empathy_score"),
@@ -527,7 +525,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--dataset", default="empathetic_dialogues",
-        choices=["iemocap", "meld", "empathetic_dialogues"],
+        choices=["meld", "empathetic_dialogues"],
     )
     parser.add_argument(
         "--metric", default="empathy_score",
